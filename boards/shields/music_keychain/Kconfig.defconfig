@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: MIT
+
+if SHIELD_MUSIC_KEYCHAIN || SHIELD_MUSIC_KEYCHAIN_BUILD_TEST
+
+config ZMK_KEYBOARD_NAME
+    default "Music Keychain"
+
+endif
+

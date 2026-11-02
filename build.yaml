@@ -1,0 +1,10 @@
+# The bootloader identifies this clone as Model nice!nano with Board-ID
+# nRF52840-nicenano. The wired P0.xx GPIO assignments are in the final shield.
+include:
+  - board: nice_nano_v2
+    shield: music_keychain
+    artifact-name: music-keychain
+  - board: nice_nano_v2
+    shield: "music_keychain settings_reset"
+    artifact-name: music-keychain-settings-reset
+

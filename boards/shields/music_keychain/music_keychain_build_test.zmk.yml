@@ -1,0 +1,9 @@
+file_format: "1"
+id: music_keychain_build_test
+name: Music Keychain (UNVERIFIED build test)
+type: shield
+requires: [pro_micro]
+features:
+  - keys
+  - encoder
+

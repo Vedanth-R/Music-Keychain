@@ -1,0 +1,3 @@
+/* Same application keymap as the final shield; only the pin overlay differs. */
+#include "music_keychain_keymap.dtsi"
+

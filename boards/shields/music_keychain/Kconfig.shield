@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: MIT
+
+config SHIELD_MUSIC_KEYCHAIN
+    def_bool $(shields_list_contains,music_keychain)
+
+config SHIELD_MUSIC_KEYCHAIN_BUILD_TEST
+    def_bool $(shields_list_contains,music_keychain_build_test)
+

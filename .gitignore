@@ -1,0 +1,6 @@
+build/
+.west/
+zephyr/.cache/
+*.swp
+*.DS_Store
+
