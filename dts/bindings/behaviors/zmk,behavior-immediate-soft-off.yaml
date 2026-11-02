@@ -1,0 +1,5 @@
+description: Enter ZMK soft-off immediately when pressed
+
+compatible: "zmk,behavior-immediate-soft-off"
+
+include: zero_param.yaml

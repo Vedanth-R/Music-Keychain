@@ -43,6 +43,8 @@ pressed nearly together, their normal media commands may be sent instead.
 - `boards/shields/music_keychain/music_keychain_keymap.dtsi` — shared media
   keymap and encoder direction.
 - `boards/shields/music_keychain/*.conf` — encoder and power settings.
+- `src/behavior_immediate_soft_off.c` — immediate OFF handler for the maintained
+  switch; it does not modify the media or Bluetooth-pairing behaviors.
 - `build.yaml` — final firmware and bond-reset CI matrix.
 - `.github/workflows/build.yml` — official reusable ZMK user-config workflow.
 
@@ -82,6 +84,10 @@ normal operation.
 
 Prebuilt copies from the final local validation are also included in the
 [`firmware`](firmware/) directory.
+
+That directory also contains a `fallback-no-switch` recovery image. It keeps
+the media controls and pairing-reset chord but disables all soft-switch
+handling, providing a known recovery path while diagnosing switch hardware.
 
 ## Local development build
 

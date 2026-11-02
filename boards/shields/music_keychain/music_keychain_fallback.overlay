@@ -1,0 +1,14 @@
+/*
+ * Recovery build: disable every soft-power trigger while retaining the media
+ * controls, encoder, Bluetooth, and three-button bond reset.
+ */
+
+/ {
+    soft_power_sideband {
+        status = "disabled";
+    };
+
+    soft_off_wakers {
+        status = "disabled";
+    };
+};
