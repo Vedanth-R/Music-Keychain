@@ -39,8 +39,8 @@
                 &kp C_NEXT
             >;
 
-            /* To reverse direction, swap C_VOL_UP and C_VOL_DN. */
-            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN>;
+            /* Direction corrected for the installed encoder orientation. */
+            sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP>;
         };
     };
 };

@@ -1,13 +1,12 @@
 /*
  * Final hardware GPIO map, reported from the labels printed on the board:
  *
- * PIN_PREVIOUS_TRACK = P0.20
- * PIN_PLAY_PAUSE     = P0.22
- * PIN_NEXT_TRACK     = P0.24
+ * PIN_PREVIOUS_TRACK = P0.17
+ * PIN_PLAY_PAUSE     = P0.20
+ * PIN_NEXT_TRACK     = P0.22
  * PIN_ENCODER_A      = P0.31 (top rotation pin)
  * PIN_ENCODER_B      = P0.29 (bottom rotation pin)
- * PIN_SOFT_OFF       = P0.06 (switch outer terminal)
- * PIN_SOFT_ON        = P0.08 (switch outer terminal)
+ * PIN_SOFT_POWER     = P0.24 (maintained switch; other terminal to GND)
  *
  * All controls are active-low and share GND. These use the nRF52840's gpio0
  * controller directly, so the numbers are raw P0.xx GPIO numbers.
@@ -34,9 +33,9 @@
         debounce-press-ms = <10>;
         debounce-release-ms = <10>;
         input-gpios
-            = <&gpio0 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* PIN_PREVIOUS_TRACK */
-            , <&gpio0 22 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* PIN_PLAY_PAUSE */
-            , <&gpio0 24 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* PIN_NEXT_TRACK */
+            = <&gpio0 17 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* PIN_PREVIOUS_TRACK */
+            , <&gpio0 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* PIN_PLAY_PAUSE */
+            , <&gpio0 22 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> /* PIN_NEXT_TRACK */
             ;
     };
 
@@ -52,20 +51,22 @@
     sensors: sensors {
         compatible = "zmk,keymap-sensors";
         sensors = <&encoder>;
-        /* 20 volume events per complete turn; adjust to taste. */
-        triggers-per-rotation = <20>;
+        /* About eight volume events per turn: roughly two turns, 0 to max. */
+        triggers-per-rotation = <8>;
     };
 
-    /* SPDT soft-power switch: common to GND; outer pins to P0.06 and P0.08. */
+    /* Maintained soft-power switch: one terminal to GND, the other to P0.24. */
     soft_power_keys {
         compatible = "gpio-keys";
 
+        /* Open means OFF. The pull-up makes the open state active-high. */
         soft_off_key: soft_off_key {
-            gpios = <&gpio0 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+            gpios = <&gpio0 24 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
         };
 
+        /* Closed to GND means ON and is the active-low wake condition. */
         soft_on_wakeup_key: soft_on_wakeup_key {
-            gpios = <&gpio0 8 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+            gpios = <&gpio0 24 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
         };
     };
 
@@ -97,10 +98,7 @@
         };
     };
 
-    /*
-     * Only the ON pole is armed during soft-off. In the OFF position it is
-     * open; moving the switch to ON grounds P0.08 and wakes the nRF52840.
-     */
+    /* During soft-off, closing the switch grounds P0.24 and wakes the board. */
     soft_power_wakeup: soft_power_wakeup {
         compatible = "zmk,gpio-key-wakeup-trigger";
         trigger = <&soft_on_wakeup_key>;

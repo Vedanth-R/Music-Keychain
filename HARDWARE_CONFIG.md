@@ -17,29 +17,25 @@ still treated as a compatible clone rather than genuine nice!nano hardware.
 
 ## Final GPIO assignments
 
-The printed `020`–`031` labels are raw nRF52840 `P0.xx` GPIOs. The authoritative
+The printed `017`–`031` labels are raw nRF52840 `P0.xx` GPIOs. The authoritative
 devicetree values are centralized in
 `boards/shields/music_keychain/music_keychain.overlay`.
 
 | Firmware assignment | Board label | Raw GPIO | Connected control |
 |---|---:|---:|---|
-| `PIN_PREVIOUS_TRACK` | `020` | `P0.20` | Back/previous switch |
-| `PIN_PLAY_PAUSE` | `022` | `P0.22` | Play/pause switch |
-| `PIN_NEXT_TRACK` | `024` | `P0.24` | Forward/next switch |
+| `PIN_PREVIOUS_TRACK` | `017` | `P0.17` | Back/previous switch |
+| `PIN_PLAY_PAUSE` | `020` | `P0.20` | Play/pause switch |
+| `PIN_NEXT_TRACK` | `022` | `P0.22` | Forward/next switch |
 | `PIN_ENCODER_A` | `031` | `P0.31` | Top encoder rotation pin |
 | `PIN_ENCODER_B` | `029` | `P0.29` | Bottom encoder rotation pin |
-| `PIN_SOFT_OFF` | `006` | `P0.06` | Soft-power switch OFF outer terminal |
-| `PIN_SOFT_ON` | `008` | `P0.08` | Soft-power switch ON/wake outer terminal |
+| `PIN_SOFT_POWER` | `024` | `P0.24` | Maintained software-power switch |
 
 All three switches' other terminals share GND. The encoder's center rotation
 terminal is also connected to GND. The encoder push switch is unused.
 
-For the three-pin SPDT power switch, connect the center pin to GND, one outside
-pin to `006`, and the other outside pin to `008`. The position that joins the
-center pin to `006` is software OFF. The position that joins it to `008` is ON
-and wakes the board. Swap the two outside wires if the installed lever
-direction is reversed. Do not connect this switch in series with B+ or B- for
-this software-off arrangement.
+The maintained power switch uses two connections: one terminal to GND and the
+other to `024`. Closed is ON. Opening the switch enters software-off; closing
+it again wakes the board. Do not connect this switch in series with B+ or B-.
 
 OFF disconnects Bluetooth, stops advertising, and enters ZMK soft-off. ON
 wakes the controller; it reconnects to a stored bond if that host is available,
@@ -50,8 +46,9 @@ not a physical battery disconnect.
 
 These do not prevent flashing:
 
-- If clockwise lowers volume, swap `C_VOL_UP` and `C_VOL_DN` in
-  `music_keychain_keymap.dtsi`.
+- Encoder direction is corrected for the tested physical orientation. If the
+  encoder wiring changes, swap `C_VOL_UP` and `C_VOL_DN` in
+  `music_keychain_keymap.dtsi` again.
 - If a detent skips or emits too many changes, tune `steps` and
   `triggers-per-rotation` in `music_keychain.overlay`.
 - Confirm every physical control produces its labeled action before installing

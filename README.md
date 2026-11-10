@@ -5,8 +5,9 @@ standard HID Consumer Control commands, so Spotify is controlled through iOS,
 Android, macOS, or Windows media handling. It uses no Spotify API, credentials,
 internet connection, or companion app.
 
-> **Hardware status:** Phase 2 is configured for the reported `P0.20`, `P0.22`,
-> `P0.24`, `P0.31`, and `P0.29` wiring. The board's UF2 report identifies it as
+> **Hardware status:** Configured for buttons on `P0.17`, `P0.20`, and
+> `P0.22`; the power switch on `P0.24`; and the encoder on `P0.31`/`P0.29`.
+> The board's UF2 report identifies it as
 > a nice!nano-compatible nRF52840, so the build uses `nice_nano_v2`. See
 > [HARDWARE_CONFIG.md](HARDWARE_CONFIG.md).
 
@@ -20,8 +21,8 @@ internet connection, or companion app.
 | Encoder clockwise | Volume up (`C_VOL_UP`) |
 | Encoder counterclockwise | Volume down (`C_VOL_DN`) |
 | Hold all three buttons for 2 seconds | Clear every bond and reopen pairing |
-| Power switch toward the `006` contact | Software off; stop Bluetooth and enter low power |
-| Power switch toward the `008` contact | Wake; reconnect or advertise for pairing |
+| Power switch open | Software off; stop Bluetooth and enter low power |
+| Power switch closed (`024` connected to GND) | Wake; reconnect or advertise for pairing |
 
 The switches use ZMK's direct-GPIO scanner—there is no artificial keyboard
 matrix. Internal pull-ups match switches wired from GPIO to ground. Ten
@@ -37,7 +38,7 @@ pressed nearly together, their normal media commands may be sent instead.
 ## Repository layout
 
 - `boards/shields/music_keychain/music_keychain.overlay` — final devicetree and
-  the authoritative location for the five wired GPIO values.
+  the authoritative location for the six wired GPIO values.
 - `boards/shields/music_keychain/music_keychain_build_test.overlay` — separate,
   plainly labeled temporary pinout used only to make compilation possible.
 - `boards/shields/music_keychain/music_keychain_keymap.dtsi` — shared media
@@ -117,7 +118,7 @@ by operating system, so the GitHub build is simpler for beginners.
 ## Flashing with the UF2 bootloader
 
 The buttons, encoder, and battery are not required for flashing. USB power is
-enough. Put the soft-power switch in its ON (`008`) position before flashing.
+enough. Close the soft-power switch (`024` connected to GND) before flashing.
 
 1. Connect the board using a USB-C **data** cable.
 2. Quickly press reset twice. The UF2 volume containing `INFO_UF2.TXT` should
@@ -142,12 +143,12 @@ Media actions are in `music_keychain_keymap.dtsi`. To reverse the encoder, swap
 the two values here:
 
 ```dts
-sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN>;
+sensor-bindings = <&inc_dec_kp C_VOL_DN C_VOL_UP>;
 ```
 
 Encoder sensitivity is controlled by `steps` and `triggers-per-rotation` in the
-overlay. The provisional values are 80 electrical steps and 20 output events
-per revolution; tune them after testing the specific EC11.
+overlay. It is configured for 80 electrical steps and eight volume events per
+revolution, targeting roughly two complete turns from minimum to maximum.
 
 ## Pairing and Spotify test
 
@@ -162,18 +163,11 @@ foreground, though exact background behavior is controlled by the host OS.
 
 ## Power behavior
 
-The SPDT switch's center terminal connects to GND. Its two outer terminals
-connect to board pads `006` and `008`:
-
-- Switch connected to `006`: OFF. Bluetooth disconnects and the controller
-  enters software-off low power.
-- Switch connected to `008`: ON. The controller wakes, then reconnects to its
-  bonded host or advertises if it needs pairing.
-
-If those directions are physically backward on the installed switch, swap the
-two outside wires; leave the center wire on GND. This is not a hard battery
-disconnect: the battery stays attached and a very small standby current
-remains. USB can also continue to power the board.
+The maintained switch connects between GND and board pad `024`. Closed is ON:
+the controller wakes, then reconnects to its bonded host or advertises if it
+needs pairing. Open is OFF: Bluetooth disconnects and the controller enters
+software-off low power. This is not a hard battery disconnect; a very small
+standby current remains, and USB can still power the board.
 
 After 30 seconds without activity ZMK enters idle while retaining a responsive
 BLE connection. After 15 minutes it enters deep sleep and disconnects BLE. Any
@@ -196,10 +190,8 @@ change the charger configuration.
 
 - **Not visible in Bluetooth:** wake with a button and wait several seconds. If
   previously bonded, remove stale bonds on both sides before pairing again.
-- **Switch does the opposite of its label:** swap only the `006` and `008`
-  outside wires; keep the center terminal connected to GND.
-- **Board immediately turns off after flashing:** move the switch to the `008`
-  ON position and press reset once.
+- **Board immediately turns off after flashing:** close the switch so `024` is
+  connected to GND, then press reset once.
 - **Connected but controls do nothing:** confirm the host accepts Bluetooth HID
   keyboards and test with its native media player before Spotify.
 - **Encoder runs backward:** swap `C_VOL_UP` and `C_VOL_DN` in the shared keymap.
@@ -216,7 +208,7 @@ change the charger configuration.
 | Repository structure and source review | Implemented |
 | Media bindings, direct keys, debounce, encoder, BLE defaults, sleep config | Implemented |
 | Two-second all-button bond reset and pairing handoff | Implemented and compile-tested |
-| SPDT software-off and dedicated wake input | Implemented and compile-tested |
+| One-pin software-off/wake switch on P0.24 | Implemented and compile-tested |
 | Temporary-pin firmware and settings-reset builds | Both compile-tested to UF2 |
 | Final `P0.xx` pin configuration | Configured and compile-tested to UF2 |
 | GitHub Actions workflow and YAML | Syntax-checked; not run without a GitHub remote |
